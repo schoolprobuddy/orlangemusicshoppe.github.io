@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orlange Music Shoppe</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --orange:#E8500A;--orange-soft:#FFF0E8;--amber:#F5A623;
+  --black:#111111;--gray-900:#1C1C1C;--gray-600:#6B6B6B;
+  --gray-200:#E8E8E8;--gray-100:#F5F5F5;--white:#FFFFFF;
+  --green:#16a34a;--red:#dc2626;--blue:#1d4ed8;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black);line-height:1.6;}
+
+/* ── NAV ── */
+nav{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;height:90px;}
+.nav-logo{display:flex;align-items:center;gap:10px;}
+.nav-dot{width:32px;height:32px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;color:var(--white);font-size:14px;font-weight:700;}
+.nav-name{font-size:15px;font-weight:700;color:var(--black);}
+.nav-links{display:flex;gap:2rem;}
+.nav-links a{color:var(--gray-600);text-decoration:none;font-size:14px;font-weight:500;transition:color .15s;}
+.nav-links a:hover{color:var(--orange);}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.nav-cta{background:var(--orange);color:var(--white);font-size:13px;font-weight:600;padding:8px 18px;border-radius:100px;text-decoration:none;transition:opacity .15s;}
+.nav-cta:hover{opacity:.88;}
+.admin-link{font-size:12px;color:var(--gray-600);text-decoration:none;padding:6px 12px;border:1px solid var(--gray-200);border-radius:100px;transition:all .15s;}
+.admin-link:hover{border-color:var(--orange);color:var(--orange);}
+
+/* ── HERO CAROUSEL ── */
+.hero-wrapper{position:relative;background:var(--white);}
+.hero{
+  position:relative;
+  width:100%;
+  height:92vh;
+  min-height:560px;
+  background:#111;
+  overflow:hidden;
+  box-shadow:0 8px 48px rgba(0,0,0,0.15);
+  border-radius:35% 24px 0 0 / 22% 24px 0 0;
+}
+
+.slide{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease-in-out;display:flex;align-items:flex-end;}
+.slide.active{opacity:1;}
+.slide-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.08);transition:transform 6s ease-out;filter:brightness(.55);}
+.slide.active .slide-img{transform:scale(1);}
+.slide-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.2) 50%,transparent 100%);}
+.slide-content{position:relative;z-index:2;padding:0 3.5rem 4.5rem;max-width:780px;}
+.slide-tag{display:inline-flex;align-items:center;gap:6px;background:var(--orange);color:var(--white);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:1.2rem;opacity:0;transform:translateY(20px);transition:opacity .6s .4s,transform .6s .4s;}
+.slide.active .slide-tag{opacity:1;transform:translateY(0);}
+.slide-title{font-family:'DM Serif Display',serif;font-size:clamp(2.2rem,5vw,4rem);color:var(--white);line-height:1.1;letter-spacing:-.02em;margin-bottom:.8rem;opacity:0;transform:translateY(28px);transition:opacity .7s .55s,transform .7s .55s;}
+.slide.active .slide-title{opacity:1;transform:translateY(0);}
+.slide-sub{font-size:1rem;color:rgba(255,255,255,.75);line-height:1.6;margin-bottom:2rem;opacity:0;transform:translateY(20px);transition:opacity .6s .75s,transform .6s .75s;}
+.slide.active .slide-sub{opacity:1;transform:translateY(0);}
+.slide-btns{display:flex;gap:12px;opacity:0;transform:translateY(16px);transition:opacity .6s .9s,transform .6s .9s;}
+.slide.active .slide-btns{opacity:1;transform:translateY(0);}
+.btn-solid{display:inline-block;background:var(--orange);color:var(--white);font-size:14px;font-weight:600;padding:12px 26px;border-radius:100px;text-decoration:none;transition:opacity .15s;}
+.btn-solid:hover{opacity:.88;}
+.btn-ghost-hero{display:inline-block;background:rgba(255,255,255,.12);color:var(--white);border:1.5px solid rgba(255,255,255,.35);font-size:14px;font-weight:600;padding:12px 26px;border-radius:100px;text-decoration:none;transition:background .2s;}
+.btn-ghost-hero:hover{background:rgba(255,255,255,.22);}
+.carousel-dots{position:absolute;bottom:1.8rem;right:3rem;z-index:10;display:flex;gap:8px;align-items:center;}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.35);border:none;cursor:pointer;padding:0;transition:background .3s,transform .3s;}
+.dot.active{background:var(--orange);transform:scale(1.3);}
+.carousel-arrows{position:absolute;top:50%;right:2rem;transform:translateY(-50%);z-index:10;display:flex;flex-direction:column;gap:10px;}
+.arrow-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:var(--white);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.arrow-btn:hover{background:var(--orange);border-color:var(--orange);}
+.hero-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--orange);z-index:10;width:0%;transition:width linear;}
+
+/* ── STATS ── */
+.stats{background:var(--orange);padding:1.2rem 2rem;position:relative;z-index:1;}
+.stats-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:center;gap:4rem;flex-wrap:wrap;}
+.stat{text-align:center;}
+.stat-num{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--white);line-height:1;}
+.stat-label{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600;margin-top:.1rem;}
+
+/* ── SECTION HELPERS ── */
+.section{padding:5rem 2.5rem;}
+.section-inner{max-width:1100px;margin:0 auto;}
+.section-eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);margin-bottom:.6rem;}
+.section-heading{font-family:'DM Serif Display',serif;font-size:clamp(1.8rem,4vw,2.6rem);letter-spacing:-.02em;line-height:1.15;color:var(--black);margin-bottom:.8rem;}
+.section-heading em{color:var(--orange);font-style:italic;}
+.section-sub{font-size:16px;color:var(--gray-600);max-width:520px;line-height:1.7;}
+
+/* ── ABOUT ── */
+.about{background:var(--gray-100);}
+.about-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;}
+.about-quote{border-left:3px solid var(--orange);padding:1.5rem 0 1.5rem 2rem;margin:2rem 0;}
+.about-quote p{font-family:'DM Serif Display',serif;font-size:1.25rem;font-style:italic;color:var(--black);line-height:1.5;}
+.about-body{font-size:15px;color:var(--gray-600);line-height:1.75;margin-bottom:1rem;}
+.about-visual{background:#0a0a1a;border-radius:24px;min-height:360px;position:relative;overflow:hidden;padding:0;}
+.about-visual-num{font-family:'DM Serif Display',serif;font-size:6rem;color:rgba(255,255,255,.15);line-height:1;position:absolute;top:1rem;right:1.5rem;}
+.about-visual-icon{font-size:4rem;margin-bottom:1rem;}
+.about-visual-text{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--white);font-style:italic;line-height:1.5;opacity:.92;}
+
+/* ── SHOP / PRODUCTS ── */
+.shop{background:var(--white);}
+.filter-bar{display:flex;gap:.6rem;flex-wrap:wrap;margin:1.5rem 0 2rem;}
+.filter-btn{font-size:13px;font-weight:600;padding:7px 16px;border-radius:100px;border:1.5px solid var(--gray-200);background:transparent;cursor:pointer;transition:all .15s;color:var(--gray-600);}
+.filter-btn:hover,.filter-btn.active{background:var(--orange);color:var(--white);border-color:var(--orange);}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.5rem;}
+.product-card{background:var(--white);border:1px solid var(--gray-200);border-radius:16px;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.product-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.08);}
+.product-img-wrap{position:relative;height:200px;overflow:hidden;background:var(--gray-100);}
+.product-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
+.product-card:hover .product-img-wrap img{transform:scale(1.05);}
+.product-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;background:var(--gray-100);}
+.badge{position:absolute;top:10px;left:10px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:100px;text-transform:uppercase;letter-spacing:.05em;}
+.badge-bestseller{background:#FFF3CD;color:#92600A;}
+.badge-promo{background:#FFE4E4;color:#B91C1C;}
+.badge-new{background:#DCFCE7;color:#166534;}
+.product-info{padding:1rem 1.1rem 1.2rem;}
+.product-name{font-size:14px;font-weight:700;color:var(--black);margin-bottom:.3rem;line-height:1.3;}
+.product-category{font-size:12px;color:var(--gray-600);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.06em;}
+.product-price{font-size:18px;font-weight:700;color:var(--orange);}
+.product-price .orig-price{font-size:13px;color:var(--gray-600);text-decoration:line-through;margin-left:6px;font-weight:400;}
+.no-products{text-align:center;padding:4rem 2rem;color:var(--gray-600);font-style:italic;grid-column:1/-1;}
+
+/* ── INSTRUMENTS CATEGORIES ── */
+.categories{background:var(--white);padding:4rem 2.5rem;}
+.inst-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem;}
+.inst-card{
+  background:var(--gray-100);
+  border-radius:16px;
+  padding:1.4rem 1.2rem;
+  transition:all .2s;
+  cursor:pointer;
+  border:2px solid transparent;
+  display:flex;flex-direction:column;gap:.3rem;
+}
+.inst-card:hover{background:var(--orange-soft);border-color:var(--orange);transform:translateY(-3px);box-shadow:0 8px 24px rgba(232,80,10,.12);}
+.inst-card:hover .inst-name{color:var(--orange);}
+.inst-card:hover .inst-link{opacity:1;}
+.inst-icon-wrap{width:44px;height:44px;border-radius:12px;background:var(--white);display:flex;align-items:center;justify-content:center;margin-bottom:.6rem;font-size:22px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.inst-card:hover .inst-icon-wrap{background:var(--orange);box-shadow:0 4px 12px rgba(232,80,10,.3);}
+.inst-icon{font-size:22px;display:block;transition:transform .2s;}
+.inst-card:hover .inst-icon{transform:scale(1.15);}
+.inst-name{font-size:13px;font-weight:700;color:var(--black);transition:color .2s;line-height:1.3;}
+.inst-desc{font-size:11px;color:var(--gray-600);line-height:1.4;}
+.inst-link{font-size:11px;font-weight:700;color:var(--orange);letter-spacing:.04em;opacity:0;transition:opacity .2s;margin-top:.2rem;}
+
+/* ── LESSONS ── */
+.lessons-banner{background:var(--black);padding:5rem 2.5rem;}
+.lessons-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:3rem;flex-wrap:wrap;}
+.lessons-coming-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.4);color:var(--amber);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 16px;border-radius:100px;}
+.lessons-partner-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:2rem;max-width:380px;flex-shrink:0;}
+.lessons-partner-icon{font-size:2rem;margin-bottom:.8rem;}
+.lessons-partner-title{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--white);margin-bottom:.6rem;line-height:1.3;}
+.lessons-partner-sub{font-size:13px;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:1.4rem;}
+.lessons-partner-actions{display:flex;flex-direction:column;gap:.7rem;}
+.btn-partner-fb{display:flex;align-items:center;gap:8px;background:#0866FF;color:var(--white);font-size:13px;font-weight:700;padding:11px 18px;border-radius:100px;text-decoration:none;transition:opacity .15s;}
+.btn-partner-fb:hover{opacity:.88;}
+.btn-partner-email{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);font-size:12px;font-weight:500;padding:10px 18px;border-radius:100px;text-decoration:none;transition:all .15s;word-break:break-all;}
+.btn-partner-email:hover{background:rgba(255,255,255,.14);color:var(--white);}
+.btn-amber{background:var(--amber);color:var(--black);font-size:14px;font-weight:700;padding:14px 28px;border-radius:100px;text-decoration:none;white-space:nowrap;display:inline-block;transition:opacity .15s;flex-shrink:0;}
+.btn-amber:hover{opacity:.88;}
+
+/* ── REVIEWS ── */
+.reviews{background:var(--white);}
+.reviews-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-top:3rem;}
+.review-card{background:var(--gray-100);border-radius:16px;padding:1.8rem;}
+.review-stars{color:var(--orange);font-size:13px;letter-spacing:2px;margin-bottom:1rem;}
+.review-text{font-size:14px;color:var(--gray-900);line-height:1.7;margin-bottom:1.2rem;}
+.review-author{font-size:12px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:.06em;}
+
+/* ── CONTACT ── */
+.contact{background:var(--gray-100);}
+.contact-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;}
+.contact-details{display:flex;flex-direction:column;gap:1.5rem;margin-top:2rem;}
+.contact-item{display:flex;align-items:flex-start;gap:14px;}
+.contact-icon{width:38px;height:38px;border-radius:10px;background:var(--white);border:1px solid var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.contact-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-600);margin-bottom:2px;}
+.contact-value{font-size:14px;font-weight:600;color:var(--black);}
+.contact-value a{color:var(--orange);text-decoration:none;}
+.form-wrap{background:var(--white);border-radius:20px;padding:2rem;border:1px solid var(--gray-200);}
+.form-wrap h3{font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:1.5rem;color:var(--black);}
+.field{margin-bottom:1rem;}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.field input,.field textarea,.field select{width:100%;background:var(--gray-100);border:1.5px solid transparent;color:var(--black);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px;border-radius:10px;outline:none;transition:border-color .15s;resize:vertical;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--orange);background:var(--white);}
+.field textarea{min-height:100px;}
+.btn-submit{background:var(--orange);color:var(--white);font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;border:none;padding:12px 24px;border-radius:100px;cursor:pointer;transition:opacity .15s;width:100%;}
+.btn-submit:hover{opacity:.88;}
+
+/* ── FOOTER ── */
+footer{background:var(--white);border-top:1px solid var(--gray-200);padding:2rem 2.5rem;position:relative;}
+.footer-top{display:flex;flex-direction:column;align-items:center;gap:.5rem;text-align:center;}
+.footer-name{font-size:14px;font-weight:700;color:var(--black);}
+.footer-copy{font-size:13px;color:var(--gray-600);}
+.footer-links{display:flex;gap:1.8rem;margin-top:.4rem;flex-wrap:wrap;justify-content:center;}
+.footer-links a{font-size:13px;color:var(--gray-600);text-decoration:none;transition:color .15s;}
+.footer-links a:hover{color:var(--orange);}
+.footer-admin-btn{position:absolute;bottom:1.4rem;right:1.8rem;font-size:12px;color:var(--gray-600);text-decoration:none;padding:5px 12px;border:1px solid var(--gray-200);border-radius:100px;transition:all .15s;}
+.footer-admin-btn:hover{border-color:var(--orange);color:var(--orange);}
+
+/* ══════════════════════════════════════
+   ADMIN PANEL
+══════════════════════════════════════ */
+#admin-panel{display:none;min-height:100vh;background:var(--gray-100);}
+.admin-nav{background:var(--black);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;}
+.admin-nav-brand{display:flex;align-items:center;gap:10px;}
+.admin-nav-dot{width:28px;height:28px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;color:var(--white);font-size:12px;font-weight:700;}
+.admin-nav-title{font-size:14px;font-weight:700;color:var(--white);}
+.admin-nav-sub{font-size:12px;color:rgba(255,255,255,.45);margin-left:8px;}
+.admin-nav-right{display:flex;align-items:center;gap:12px;}
+.btn-back{font-size:13px;color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:6px 14px;border-radius:100px;cursor:pointer;transition:all .15s;}
+.btn-back:hover{background:rgba(255,255,255,.15);color:var(--white);}
+.admin-body{max-width:1100px;margin:0 auto;padding:2.5rem 2rem;}
+
+/* Login */
+.login-wrap{min-height:80vh;display:flex;align-items:center;justify-content:center;}
+.login-card{background:var(--white);border-radius:20px;padding:2.5rem;width:100%;max-width:380px;border:1px solid var(--gray-200);text-align:center;}
+.login-icon{width:56px;height:56px;border-radius:50%;background:var(--orange-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;font-size:1.5rem;}
+.login-title{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.4rem;color:var(--black);}
+.login-sub{font-size:14px;color:var(--gray-600);margin-bottom:1.8rem;}
+.login-field{margin-bottom:1rem;text-align:left;}
+.login-field label{display:block;font-size:12px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.login-field input{width:100%;background:var(--gray-100);border:1.5px solid transparent;color:var(--black);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px;border-radius:10px;outline:none;transition:border-color .15s;}
+.login-field input:focus{border-color:var(--orange);background:var(--white);}
+.login-btn{width:100%;background:var(--orange);color:var(--white);font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;border:none;padding:12px;border-radius:100px;cursor:pointer;transition:opacity .15s;margin-top:.5rem;}
+.login-btn:hover{opacity:.88;}
+.login-error{font-size:13px;color:#B91C1C;margin-top:.8rem;display:none;}
+
+/* Admin dashboard */
+.admin-dashboard{display:none;}
+.admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
+.admin-title{font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--black);}
+.btn-add{background:var(--orange);color:var(--white);font-size:13px;font-weight:700;padding:10px 20px;border-radius:100px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity .15s;}
+.btn-add:hover{opacity:.88;}
+
+/* Summary cards */
+.summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:2rem;}
+.sum-card{background:var(--white);border-radius:14px;padding:1.2rem;border:1px solid var(--gray-200);text-align:center;}
+.sum-num{font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--orange);line-height:1;}
+.sum-label{font-size:12px;color:var(--gray-600);margin-top:.3rem;font-weight:500;}
+
+/* Product table */
+.table-wrap{background:var(--white);border-radius:16px;border:1px solid var(--gray-200);overflow:hidden;}
+.table-toolbar{padding:1rem 1.5rem;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+.table-search{flex:1;min-width:180px;background:var(--gray-100);border:1.5px solid transparent;color:var(--black);font-family:'DM Sans',sans-serif;font-size:14px;padding:8px 14px;border-radius:10px;outline:none;transition:border-color .15s;}
+.table-search:focus{border-color:var(--orange);background:var(--white);}
+.table-filter{font-size:13px;background:var(--gray-100);border:1px solid var(--gray-200);color:var(--black);padding:8px 12px;border-radius:10px;outline:none;font-family:'DM Sans',sans-serif;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-600);padding:12px 16px;text-align:left;background:var(--gray-100);border-bottom:1px solid var(--gray-200);}
+td{font-size:13px;padding:12px 16px;border-bottom:1px solid var(--gray-200);color:var(--black);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--orange-soft);}
+.td-img{width:44px;height:44px;border-radius:8px;object-fit:cover;background:var(--gray-100);}
+.td-img-placeholder{width:44px;height:44px;border-radius:8px;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:1.4rem;}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.04em;}
+.tag-bestseller{background:#FFF3CD;color:#92600A;}
+.tag-promo{background:#FFE4E4;color:#B91C1C;}
+.tag-new{background:#DCFCE7;color:#166534;}
+.tag-none{background:var(--gray-100);color:var(--gray-600);}
+.action-btns{display:flex;gap:6px;}
+.btn-edit,.btn-delete{font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px;border:none;cursor:pointer;transition:all .15s;}
+.btn-edit{background:var(--gray-100);color:var(--black);}
+.btn-edit:hover{background:var(--orange);color:var(--white);}
+.btn-delete{background:#FEE2E2;color:#B91C1C;}
+.btn-delete:hover{background:#B91C1C;color:var(--white);}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:20px;padding:2rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--black);}
+.modal-close{width:32px;height:32px;border-radius:50%;background:var(--gray-100);border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.modal-close:hover{background:var(--gray-200);}
+.modal-field{margin-bottom:1rem;}
+.modal-field label{display:block;font-size:12px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--gray-100);border:1.5px solid transparent;color:var(--black);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px;border-radius:10px;outline:none;transition:border-color .15s;}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--orange);background:var(--white);}
+.modal-field textarea{min-height:80px;resize:vertical;}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.img-preview-wrap{margin-top:.5rem;}
+.img-preview{width:100%;height:140px;border-radius:10px;object-fit:cover;border:1px solid var(--gray-200);display:none;}
+.img-placeholder{width:100%;height:140px;border-radius:10px;background:var(--gray-100);border:2px dashed var(--gray-200);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;font-size:13px;color:var(--gray-600);cursor:pointer;transition:border-color .15s;}
+.img-placeholder:hover{border-color:var(--orange);}
+.modal-actions{display:flex;gap:.8rem;margin-top:1.5rem;}
+.btn-save{flex:1;background:var(--orange);color:var(--white);font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;border:none;padding:12px;border-radius:100px;cursor:pointer;transition:opacity .15s;}
+.btn-save:hover{opacity:.88;}
+.btn-cancel{background:var(--gray-100);color:var(--black);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;border:none;padding:12px 20px;border-radius:100px;cursor:pointer;transition:background .15s;}
+.btn-cancel:hover{background:var(--gray-200);}
+
+/* Toast */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--black);color:var(--white);font-size:14px;font-weight:500;padding:.8rem 1.4rem;border-radius:100px;z-index:2000;transform:translateY(80px);opacity:0;transition:all .3s;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+
+/* ── PRODUCT INQUIRY MODAL ── */
+.inq-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem;}
+.inq-overlay.open{display:flex;}
+.inq-card{background:var(--white);border-radius:20px;padding:2rem;max-width:360px;width:100%;text-align:center;position:relative;}
+.inq-close{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;background:var(--gray-100);border:none;cursor:pointer;font-size:17px;line-height:30px;transition:background .15s;}
+.inq-close:hover{background:var(--gray-200);}
+.inq-img{width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:1.2rem;background:var(--gray-100);}
+.inq-img-placeholder{width:100%;height:180px;border-radius:12px;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:3.5rem;margin-bottom:1.2rem;}
+.inq-name{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--black);margin-bottom:.3rem;}
+.inq-cat{font-size:12px;color:var(--gray-600);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;}
+.inq-price{font-size:1.1rem;font-weight:700;color:var(--orange);margin-bottom:1.4rem;}
+.inq-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:#0866FF;color:var(--white);font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;padding:13px 24px;border-radius:100px;text-decoration:none;transition:opacity .15s;width:100%;}
+.inq-btn:hover{opacity:.88;}
+.inq-btn-icon{font-size:20px;line-height:1;}
+.inq-note{font-size:12px;color:var(--gray-600);margin-top:1rem;}
+
+@media(max-width:720px){
+  .about-inner,.contact-grid{grid-template-columns:1fr;}
+  .inst-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  nav{padding:0 1.5rem;}
+  .nav-links{display:none;}
+  .slide-content{padding:0 1.5rem 3rem;}
+  .carousel-arrows{display:none;}
+  .modal-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════ WEBSITE ════════════ -->
+<div id="website">
+
+<nav>
+  <div class="nav-logo">
+    <img src="img/img1.jpg" alt="Orlange Music Shoppe" style="height:80px;width:auto;object-fit:contain;">
+  </div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#shop">Shop</a>
+    <a href="#lessons">Lessons</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="nav-right">
+    <a href="https://www.facebook.com/orlangemusicshoppe" class="nav-cta">Find us on Facebook</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+
+<div class="hero-wrapper"><section class="hero" id="hero">
+  <div id="slides"></div>
+  <div class="carousel-dots" id="dots"></div>
+  <div class="carousel-arrows">
+    <button class="arrow-btn" onclick="changeSlide(-1)">&#8593;</button>
+    <button class="arrow-btn" onclick="changeSlide(1)">&#8595;</button>
+  </div>
+  <div class="hero-progress" id="progress"></div>
+</section></div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-num">8</div><div class="stat-label">Years in Business</div></div>
+    <div class="stat"><div class="stat-num">1,800+</div><div class="stat-label">Facebook Followers</div></div>
+    <div class="stat"><div class="stat-num">San Pablo</div><div class="stat-label">City, Laguna</div></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="about section" id="about">
+  <div class="about-inner">
+    <div>
+      <p class="section-eyebrow">Our story</p>
+      <h2 class="section-heading">Family-owned,<br><em>music-driven.</em></h2>
+      <div class="about-quote"><p>"8 years of sharing the love of music — thank you for making it all possible."</p></div>
+      <p class="about-body">Orlange Music Shoppe was born from a simple dream: a place in San Pablo City where every musician — beginner or pro — feels at home.</p>
+      <p class="about-body">We hand-pick every instrument on our shelves, give honest advice, and genuinely celebrate every milestone our customers reach. When you shop with us, you're family.</p>
+    </div>
+    <div class="about-visual">
+      <img src="img/img2.png" alt="Orlange Music Shoppe" style="width:100%;height:100%;object-fit:cover;object-position:center;border-radius:24px;display:block;">
+      <!-- Overlay with 8 years badge and quote -->
+      <div style="position:absolute;inset:0;border-radius:24px;background:linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 55%, transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:1.8rem;">
+        <p style="font-family:'DM Serif Display',serif;font-size:1rem;font-style:italic;color:rgba(255,255,255,0.92);line-height:1.5;margin-bottom:0;">"A hidden gem in San Pablo City — knowledgeable, friendly, and passionate."</p>
+      </div>
+      <!-- 8 Years badge top-right -->
+      <div style="position:absolute;top:1.2rem;right:1.2rem;background:rgba(0,0,0,0.5);border:1.5px solid rgba(245,166,35,0.6);border-radius:50%;width:60px;height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+        <span style="font-family:'DM Serif Display',serif;font-size:1.4rem;color:#F5A623;line-height:1;font-weight:700;">8</span>
+        <span style="font-size:8px;color:rgba(255,255,255,0.8);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;">Years</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SHOP -->
+<section class="shop section" id="shop">
+  <div class="section-inner">
+    <p class="section-eyebrow">Our products</p>
+    <h2 class="section-heading">Instruments & <em>gear</em></h2>
+    <p class="section-sub">Browse our collection — from starter kits to professional gear.</p>
+    <div class="filter-bar" id="filter-bar">
+      <button class="filter-btn active" id="filter-all" onclick="filterProducts('all',this)">All</button>
+      <button class="filter-btn" onclick="filterProducts('Best Seller',this)">⭐ Best Sellers</button>
+      <button class="filter-btn" onclick="filterProducts('On Promo',this)">🔥 On Promo</button>
+      <button class="filter-btn" onclick="filterProducts('New Arrival',this)">✨ New Arrivals</button>
+      <span style="width:1px;background:var(--gray-200);height:24px;align-self:center;display:inline-block;margin:0 4px;"></span>
+      <button class="filter-btn" id="cat-Guitar" onclick="filterByCategory('Guitar')">🎸 Guitars</button>
+      <button class="filter-btn" id="cat-Drum" onclick="filterByCategory('Drum')">🥁 Drums</button>
+      <button class="filter-btn" id="cat-Keyboard" onclick="filterByCategory('Keyboard')">🎹 Keys</button>
+      <button class="filter-btn" id="cat-Brass & Winds" onclick="filterByCategory('Brass & Winds')">🎺 Brass</button>
+      <button class="filter-btn" id="cat-Amplifier" onclick="filterByCategory('Amplifier')">🔊 Amps</button>
+      <button class="filter-btn" id="cat-Accessory" onclick="filterByCategory('Accessory')">🎙️ Accessories</button>
+      <button class="filter-btn" id="cat-Strings" onclick="filterByCategory('Strings')">🎼 Strings</button>
+    </div>
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="categories section" id="instruments">
+  <div class="section-inner">
+    <p class="section-eyebrow">What we carry</p>
+    <h2 class="section-heading">Browse by <em>category</em></h2>
+    <div class="inst-grid">
+      <div class="inst-card" onclick="filterByCategory('Guitar')" title="Browse Guitars"><div class="inst-icon-wrap"><span class="inst-icon">🎸</span></div><div class="inst-name">Guitars</div><div class="inst-desc">Acoustic, electric & bass</div><div class="inst-link">Browse →</div></div>
+      <div class="inst-card" onclick="filterByCategory('Drum')" title="Browse Drums"><div class="inst-icon-wrap"><span class="inst-icon">🥁</span></div><div class="inst-name">Drums & percussion</div><div class="inst-desc">Kits, pads & cymbals</div><div class="inst-link">Browse →</div></div>
+      <div class="inst-card" onclick="filterByCategory('Keyboard')" title="Browse Keyboards"><div class="inst-icon-wrap"><span class="inst-icon">🎹</span></div><div class="inst-name">Keys & pianos</div><div class="inst-desc">Keyboards & digital pianos</div><div class="inst-link">Browse →</div></div>
+      <div class="inst-card" onclick="filterByCategory('Brass & Winds')" title="Browse Brass & Winds"><div class="inst-icon-wrap"><span class="inst-icon">🎺</span></div><div class="inst-name">Brass & winds</div><div class="inst-desc">Trumpets, saxes & more</div><div class="inst-link">Browse →</div></div>
+      <div class="inst-card" onclick="filterByCategory('Amplifier')" title="Browse Amps"><div class="inst-icon-wrap"><span class="inst-icon">🔊</span></div><div class="inst-name">Amps & sound</div><div class="inst-desc">Amplifiers & PA systems</div><div class="inst-link">Browse →</div></div>
+      <div class="inst-card" onclick="filterByCategory('Accessory')" title="Browse Accessories"><div class="inst-icon-wrap"><span class="inst-icon">🎙️</span></div><div class="inst-name">Accessories</div><div class="inst-desc">Strings, picks & cases</div><div class="inst-link">Browse →</div></div>
+
+      <div class="inst-card" onclick="filterByCategory('Strings')" title="Browse Strings"><div class="inst-icon-wrap"><span class="inst-icon">🎼</span></div><div class="inst-name">Strings</div><div class="inst-desc">Guitar, violin & more</div><div class="inst-link">Browse →</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LESSONS -->
+<section class="lessons-banner" id="lessons">
+  <div class="lessons-inner">
+    <div class="lessons-text">
+      <div class="lessons-coming-badge">🎵 Coming Soon</div>
+      <p class="section-eyebrow" style="color:var(--amber);margin-top:.8rem">Music Lessons</p>
+      <h2 class="section-heading" style="color:var(--white)">We're bringing <em style="color:var(--amber)">music lessons</em><br>to Orlange.</h2>
+      <p class="section-sub" style="color:rgba(255,255,255,.6);margin-top:.8rem;max-width:480px;">From guitar to keyboards, vocals to violin — we're building something exciting for music lovers of all ages. Stay tuned!</p>
+    </div>
+    <div class="lessons-partner-card">
+      <div class="lessons-partner-icon">🤝</div>
+      <h3 class="lessons-partner-title">Interested to partner with us?</h3>
+      <p class="lessons-partner-sub">We're looking for music teachers, freelancers, music schools, and passionate educators to collaborate with.</p>
+      <div class="lessons-partner-actions">
+        <a href="https://m.me/orlangemusicshoppe" target="_blank" class="btn-partner-fb">
+          <span>💬</span> Send us a message
+        </a>
+        <a href="mailto:orlangemusicshoppe@gmail.com" class="btn-partner-email">
+          <span>✉️</span> orlangemusicshoppe@gmail.com
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="reviews section">
+  <div class="section-inner">
+    <p class="section-eyebrow">Customer love</p>
+    <h2 class="section-heading">What people <em>say</em></h2>
+    <div class="reviews-grid">
+      <div class="review-card"><div class="review-stars">★★★★★</div><p class="review-text">"A hidden gem in San Pablo City! Impressive collection and incredibly knowledgeable, friendly staff."</p><div class="review-author">— Happy customer</div></div>
+      <div class="review-card"><div class="review-stars">★★★★★</div><p class="review-text">"So grateful for Orlange! Great selection and very helpful staff. Found the perfect guitar thanks to them."</p><div class="review-author">— Satisfied musician</div></div>
+      <div class="review-card"><div class="review-stars">★★★★★</div><p class="review-text">"Excellent customer service and made my shopping experience truly enjoyable. Highly recommended!"</p><div class="review-author">— Local customer</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact section" id="contact">
+  <div class="contact-grid">
+    <div>
+      <p class="section-eyebrow">Come see us</p>
+      <h2 class="section-heading">Visit the <em>shoppe.</em></h2>
+      <p class="section-sub">We'd love to meet you. Drop by and let's talk music.</p>
+      <div class="contact-details">
+        <div class="contact-item"><div class="contact-icon">📍</div><div><div class="contact-label">Location</div><div class="contact-value"><a href="https://www.google.com/maps/search/Orlange+Music+Shoppe+1245+Cosico+Ave+Del+Remedio+San+Pablo+City+Laguna" target="_blank" style="color:var(--orange);text-decoration:none;">1245 Cosico Ave., Del Remedio,<br>San Pablo City, Laguna</a><br><span style="font-size:12px;color:var(--gray-600);">📌 <a href="https://www.google.com/maps/search/Orlange+Music+Shoppe+1245+Cosico+Ave+Del+Remedio+San+Pablo+City+Laguna" target="_blank" style="color:var(--orange);">View on Google Maps →</a></span></div></div></div>
+        <div class="contact-item"><div class="contact-icon">📞</div><div><div class="contact-label">Phone</div><div class="contact-value"><a href="tel:+639081968844" style="color:var(--black);text-decoration:none;">+63 908 196 8844</a></div></div></div>
+        <div class="contact-item"><div class="contact-icon">📘</div><div><div class="contact-label">Facebook</div><div class="contact-value"><a href="https://www.facebook.com/orlangemusicshoppe">@orlangemusicshoppe</a></div></div></div>
+        <div class="contact-item"><div class="contact-icon">🕐</div><div><div class="contact-label">Hours</div><div class="contact-value">Check our Facebook page</div></div></div>
+      </div>
+    </div>
+    <div class="form-wrap">
+      <h3>Send a message</h3>
+      <div class="field"><label>Your name</label><input type="text" placeholder="e.g. Juan dela Cruz"></div>
+      <div class="field"><label>Email or phone</label><input type="text" placeholder="So we can reach you"></div>
+      <div class="field"><label>Message</label><textarea placeholder="Ask about instruments, lessons, stock..."></textarea></div>
+      <button class="btn-submit">Send message</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <img src="img/img1.jpg" alt="Orlange Music Shoppe" style="height:48px;width:auto;object-fit:contain;margin-bottom:.2rem;">
+    <div class="footer-copy">© 2025 · San Pablo City, Laguna</div>
+    <div class="footer-links">
+      <a href="#about">About</a>
+      <a href="#shop">Shop</a>
+      <a href="#lessons">Lessons</a>
+      <a href="https://www.facebook.com/orlangemusicshoppe" target="_blank">Facebook</a>
+    </div>
+  </div>
+  <a href="#" class="footer-admin-btn" onclick="showAdmin(event)">⚙ Admin</a>
+</footer>
+</div><!-- end #website -->
+
+<!-- ════════════ ADMIN PANEL ════════════ -->
+<div id="admin-panel">
+  <div class="admin-nav">
+    <div class="admin-nav-brand">
+      <img src="img/img1.jpg" alt="Orlange Music Shoppe" style="height:34px;width:auto;object-fit:contain;filter:brightness(1.1);">
+      <span class="admin-nav-sub" style="margin-left:10px;">Product Manager</span>
+    </div>
+    <div class="admin-nav-right">
+      <button class="btn-back" onclick="backToSite()">← Back to website</button>
+    </div>
+  </div>
+  <div class="admin-body">
+
+    <!-- LOGIN -->
+    <div class="login-wrap" id="login-section">
+      <div class="login-card">
+        <div class="login-icon">🔐</div>
+        <div class="login-title">Admin Login</div>
+        <div class="login-sub">Enter your password to manage products</div>
+        <div class="login-field"><label>Password</label><input type="password" id="pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="login-btn" onclick="doLogin()">Log in</button>
+        <div class="login-error" id="login-error">Incorrect password. Try again.</div>
+        <p style="font-size:12px;color:var(--gray-600);margin-top:1.2rem;">Default password: <strong>orlange2025</strong></p>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="admin-dashboard" id="admin-dashboard">
+      <div class="admin-header">
+        <div class="admin-title">Product Manager</div>
+        <button class="btn-add" onclick="openModal()">＋ Add Product</button>
+      </div>
+      <div class="summary-cards" id="summary-cards"></div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="table-search" placeholder="Search products..." oninput="renderTable()" id="tbl-search">
+          <select class="table-filter" onchange="renderTable()" id="tbl-filter">
+          <option value="all">All categories</option>
+          <option value="Guitar">Guitar</option>
+          <option value="Drum">Drum</option>
+          <option value="Keyboard">Keyboard</option>
+          <option value="Brass & Winds">Brass & Winds</option>
+          <option value="Amplifier">Amplifier</option>
+          <option value="Accessory">Accessory</option>
+          <option value="Strings">Strings</option>
+        </select>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="prod-table">
+            <thead><tr><th>Photo</th><th>Name</th><th>Category</th><th>Price</th><th>Tag</th><th>Actions</th></tr></thead>
+            <tbody id="prod-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Add Product</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-field">
+      <label>Product Name</label>
+      <input type="text" id="f-name" placeholder="e.g. Davis Acoustic Guitar">
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Category</label>
+        <select id="f-cat">
+          <option value="Guitar">Guitar</option>
+          <option value="Drum">Drum</option>
+          <option value="Keyboard">Keyboard</option>
+          <option value="Brass & Winds">Brass & Winds</option>
+          <option value="Amplifier">Amplifier</option>
+          <option value="Accessory">Accessory</option>
+          <option value="Strings">Strings</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Tag</label>
+        <select id="f-tag">
+          <option value="none">None</option>
+          <option value="Best Seller">Best Seller</option>
+          <option value="On Promo">On Promo</option>
+          <option value="New Arrival">New Arrival</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Price (₱) <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <input type="number" id="f-price" placeholder="e.g. 2500">
+      </div>
+      <div class="modal-field">
+        <label>Original Price (₱) <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional, for sale)</span></label>
+        <input type="number" id="f-orig" placeholder="e.g. 3000">
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Description <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+      <textarea id="f-desc" placeholder="Brief description of the product..."></textarea>
+    </div>
+    <div class="modal-field">
+      <label>Product Photo</label>
+      <div class="img-preview-wrap">
+        <div class="img-placeholder" id="img-placeholder" onclick="document.getElementById('f-img').click()">
+          <span style="font-size:1.8rem">📷</span>
+          <span>Click to upload photo</span>
+          <span style="font-size:11px;color:var(--gray-600)">JPG, PNG — max 2MB</span>
+        </div>
+        <img class="img-preview" id="img-preview" alt="preview">
+      </div>
+      <input type="file" id="f-img" accept="image/*" style="display:none" onchange="previewImg(this)">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── SUPABASE CONFIG ── */
+var SUPABASE_URL = 'https://divkxnqvdlzzajxozgoh.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpdmt4bnF2ZGx6emFqeG96Z29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMjU0MTYsImV4cCI6MjA5NTcwMTQxNn0.JHpjRYIV5YVdvjuAoYpLRJCxjqmp-RbBP0sdnHbl51c';
+var sb = null;
+
+// Init Supabase immediately - CDN is already loaded from <head>
+(function initSupabase() {
+  var attempts = 0;
+  function tryInit() {
+    if (typeof supabase !== 'undefined' && supabase.createClient) {
+      sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      console.log('Supabase initialized!');
+    } else if (attempts < 20) {
+      attempts++;
+      setTimeout(tryInit, 100);
+    } else {
+      console.error('Supabase failed to load after 2 seconds');
+    }
+  }
+  tryInit();
+})();
+
+const SLIDES = [{"img": "img/img5.jpg", "title": "Your Music Starts Here.", "sub": "San Pablo City's go-to music shop \u2014 guitars, drums, keys & more."}, {"img": "img/img6.jpg", "title": "Find Your Perfect Guitar.", "sub": "Hand-picked instruments for every player, every level."}, {"img": "img/img7.jpg", "title": "Quality You Can See & Feel.", "sub": "Browse our wide collection of acoustic & electric guitars."}, {"img": "img/img8.jpg", "title": "A Shop Built on Passion.", "sub": "8 years of sharing the love of music in San Pablo City."}, {"img": "img/img9.jpg", "title": "Every Color. Every Style.", "sub": "We carry brands and guitars we truly believe in."}, {"img": "img/img10.jpg", "title": "More Guitars Than You Can Count.", "sub": "Allegro, Davis, Venus, Global & more \u2014 all under one roof."}, {"img": "img/img11.jpg", "title": "Not Just Guitars.", "sub": "Drums, keys, amps, accessories \u2014 your complete music store."}];
+
+const INTERVAL = 4000;
+let current = 0, timer = null;
+
+const slidesEl = document.getElementById('slides');
+const dotsEl = document.getElementById('dots');
+const progressEl = document.getElementById('progress');
+
+SLIDES.forEach((s,i) => {
+  const div = document.createElement('div');
+  div.className = 'slide'+(i===0?' active':'');
+  div.innerHTML = `<img class="slide-img" src="${s.img}" alt="slide"><div class="slide-overlay"></div><div class="slide-content"><div class="slide-tag">Orlange Music Shoppe · San Pablo City</div><h1 class="slide-title">${s.title}</h1><p class="slide-sub">${s.sub}</p><div class="slide-btns"><a href="#shop" class="btn-solid">Browse products</a><a href="#contact" class="btn-ghost-hero">Visit us</a></div></div>`;
+  slidesEl.appendChild(div);
+  const dot = document.createElement('button');
+  dot.className='dot'+(i===0?' active':'');
+  dot.onclick=()=>goTo(i);
+  dotsEl.appendChild(dot);
+});
+
+function goTo(n) {
+  document.querySelectorAll('.slide')[current].classList.remove('active');
+  document.querySelectorAll('.dot')[current].classList.remove('active');
+  current=(n+SLIDES.length)%SLIDES.length;
+  document.querySelectorAll('.slide')[current].classList.add('active');
+  document.querySelectorAll('.dot')[current].classList.add('active');
+  startProgress();
+}
+function changeSlide(d){clearTimeout(timer);goTo(current+d);timer=setTimeout(nextSlide,INTERVAL);}
+function nextSlide(){goTo(current+1);timer=setTimeout(nextSlide,INTERVAL);}
+function startProgress(){
+  progressEl.style.transition='none';progressEl.style.width='0%';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    progressEl.style.transition=`width ${INTERVAL}ms linear`;progressEl.style.width='100%';
+  }));
+}
+// Initialize carousel and products when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  startProgress();
+  timer=setTimeout(nextSlide,INTERVAL);
+  renderProducts();
+});
+
+
+/* ── PRODUCTS STORE (Supabase) ── */
+var _productCache = null;
+
+function getProducts(){
+  if(_productCache) return Promise.resolve(_productCache);
+  if(!sb) {
+    return new Promise(function(resolve) {
+      setTimeout(function(){ getProducts().then(resolve); }, 200);
+    });
+  }
+  return sb.from('products').select('*').order('created_at', {ascending:false})
+    .then(function(result){
+      if(result.error) throw result.error;
+      _productCache = (result.data||[]).map(function(p){return {
+        id: p.id, name: p.name, category: p.category,
+        tag: p.tag||'none', price: p.price, origPrice: p.orig_price,
+        description: p.description, img: p.img
+      };});
+      return _productCache;
+    }).catch(function(e){
+      console.error('Supabase error:', e);
+      return [];
+    });
+}
+
+function saveProductToDB(product, isEdit){
+  var row = {
+    name: product.name, category: product.category,
+    tag: product.tag||'none', price: product.price||null,
+    orig_price: product.origPrice||null,
+    description: product.description||null, img: product.img||null
+  };
+  _productCache = null;
+  if(isEdit){
+    return sb.from('products').update(row).eq('id', product.id)
+      .then(function(r){ if(r.error) throw r.error; });
+  } else {
+    return sb.from('products').insert(row)
+      .then(function(r){ if(r.error) throw r.error; });
+  }
+}
+
+function deleteProductFromDB(id){
+  _productCache = null;
+  return sb.from('products').delete().eq('id', id)
+    .then(function(r){ if(r.error) throw r.error; });
+}
+
+const EMOJI={Guitar:'🎸',Drum:'🥁',Keyboard:'🎹','Brass & Winds':'🎺',Amplifier:'🔊',Accessory:'🎙️','Strings':'🎼'};
+const TAG_CLASS={none:'tag-none','Best Seller':'tag-bestseller','On Promo':'tag-promo','New Arrival':'tag-new'};
+const TAG_LABEL={none:'—','Best Seller':'Best Seller','On Promo':'On Promo','New Arrival':'New Arrival'};
+const BADGE_CLASS={'Best Seller':'badge-bestseller','On Promo':'badge-promo','New Arrival':'badge-new'};
+
+var _currentFilter = 'all';
+
+function renderProducts(filter){
+  if(filter===undefined) filter='all';
+  _currentFilter = filter;
+  var grid=document.getElementById('products-grid');
+  grid.innerHTML='<p class="no-products" style="opacity:.5">Loading products...</p>';
+  return getProducts().then(function(prods){
+  if(filter==='all'||filter===undefined){
+    // all products
+  } else if(['Best Seller','On Promo','New Arrival'].includes(filter)){
+    prods=prods.filter(p=>p.tag===filter);
+  }
+  if(!prods.length){
+    grid.innerHTML='<p class="no-products">No products yet. Check back soon!</p>';return;
+  }
+  grid.innerHTML=prods.map(p=>{
+    const imgHtml=p.img
+      ?`<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">`
+      :`<div class="product-img-placeholder">${EMOJI[p.category]||'🎵'}</div>`;
+    const badgeHtml=p.tag&&p.tag!=='none'?`<span class="badge ${BADGE_CLASS[p.tag]}">${p.tag}</span>`:'';
+    const origHtml=p.origPrice?`<span class="orig-price">₱${Number(p.origPrice).toLocaleString()}</span>`:'';
+    return `<div class="product-card" onclick="openInquiry('${p.id}')" style="cursor:pointer">
+      <div class="product-img-wrap">${imgHtml}${badgeHtml}</div>
+      <div class="product-info">
+        <div class="product-category">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-price">${p.price?`₱${Number(p.price).toLocaleString()}${origHtml}`:''}</div>
+      </div>
+    </div>`;
+  }).join('');
+  });
+}
+renderProducts();
+
+function filterProducts(tag,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts(tag);
+}
+
+function filterByCategory(cat){
+  // Scroll to shop section
+  document.getElementById('shop').scrollIntoView({behavior:'smooth'});
+  // Update filter buttons
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  const catBtn = document.getElementById('cat-'+cat);
+  if(catBtn) catBtn.classList.add('active');
+  // Render filtered by category
+  const grid=document.getElementById('products-grid');
+  getProducts().then(allProds=>{
+  let prods=allProds.filter(p=>p.category===cat);
+  if(!prods.length){
+    grid.innerHTML=`<p class="no-products">No ${cat} products listed yet. <a href="https://www.facebook.com/orlangemusicshoppe" target="_blank" style="color:var(--orange)">Message us on Facebook</a> to ask about availability!</p>`;
+    return;
+  }
+  const EMOJI={Guitar:'🎸',Drum:'🥁',Keyboard:'🎹','Brass & Winds':'🎺',Amplifier:'🔊',Accessory:'🎙️','Strings':'🎼'};
+  const BADGE_CLASS={'Best Seller':'badge-bestseller','On Promo':'badge-promo','New Arrival':'badge-new'};
+  grid.innerHTML=prods.map(p=>{
+    const imgHtml=p.img?`<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">`:`<div class="product-img-placeholder">${EMOJI[p.category]||'🎵'}</div>`;
+    const badgeHtml=p.tag&&p.tag!=='none'?`<span class="badge ${BADGE_CLASS[p.tag]}">${p.tag}</span>`:'';
+    const origHtml=p.origPrice?`<span class="orig-price">₱${Number(p.origPrice).toLocaleString()}</span>`:'';
+    return `<div class="product-card" onclick="openInquiry('${p.id}')" style="cursor:pointer">
+      <div class="product-img-wrap">${imgHtml}${badgeHtml}</div>
+      <div class="product-info">
+        <div class="product-category">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-price">${p.price?`₱${Number(p.price).toLocaleString()}${origHtml}`:''}</div>
+      </div>
+    </div>`;
+  }).join('');
+});
+}
+
+/* ── ADMIN ── */
+var editId=null;
+var ADMIN_PW='orlange2025';
+var loggedIn=false;
+
+function showAdmin(e){e.preventDefault();document.getElementById('website').style.display='none';document.getElementById('admin-panel').style.display='block';}
+function backToSite(){document.getElementById('admin-panel').style.display='none';document.getElementById('website').style.display='block';}
+function doLogin(){
+  var pw=document.getElementById('pw-input').value.trim();
+  if(pw==='orlange2025'){
+    loggedIn=true;
+    document.getElementById('login-section').style.display='none';
+    document.getElementById('admin-dashboard').style.display='block';
+    renderSummary();renderTable();
+  } else {
+    document.getElementById('login-error').style.display='block';
+  }
+}
+
+function renderSummary(){
+  return getProducts().then(function(prods){
+  const total=prods.length;
+  const bs=prods.filter(p=>p.tag==='Best Seller').length;
+  const promo=prods.filter(p=>p.tag==='On Promo').length;
+  const na=prods.filter(p=>p.tag==='New Arrival').length;
+  document.getElementById('summary-cards').innerHTML=`
+    <div class="sum-card"><div class="sum-num">${total}</div><div class="sum-label">Total Products</div></div>
+    <div class="sum-card"><div class="sum-num">${bs}</div><div class="sum-label">Best Sellers</div></div>
+    <div class="sum-card"><div class="sum-num">${promo}</div><div class="sum-label">On Promo</div></div>
+    <div class="sum-card"><div class="sum-num">${na}</div><div class="sum-label">New Arrivals</div></div>`;
+  });
+}
+
+function renderTable(){
+  var search=document.getElementById('tbl-search').value.toLowerCase();
+  var catFilter=document.getElementById('tbl-filter').value;
+  return getProducts().then(function(prods){
+  if(catFilter!=='all') prods=prods.filter(p=>p.category===catFilter);
+  if(search) prods=prods.filter(p=>p.name.toLowerCase().includes(search)||p.category.toLowerCase().includes(search));
+  const tbody=document.getElementById('prod-tbody');
+  if(!prods.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray-600);font-style:italic;">No products found.</td></tr>';return;}
+  tbody.innerHTML=prods.map(p=>{
+    const imgCell=p.img
+      ?`<img class="td-img" src="${p.img}" alt="">`
+      :`<div class="td-img-placeholder">${EMOJI[p.category]||'🎵'}</div>`;
+    return `<tr>
+      <td>${imgCell}</td>
+      <td><strong>${p.name}</strong>${p.description?`<br><span style="font-size:12px;color:var(--gray-600)">${p.description}</span>`:''}</td>
+      <td>${p.category}</td>
+      <td style="font-weight:700;color:var(--orange)">${p.price?`₱${Number(p.price).toLocaleString()}${p.origPrice?`<br><span style='font-size:11px;color:var(--gray-600);text-decoration:line-through;font-weight:400'>₱${Number(p.origPrice).toLocaleString()}</span>`:''}`:'<span style="font-size:12px;color:var(--gray-600);font-weight:500">Ask for price</span>'}</td>
+      <td><span class="tag ${TAG_CLASS[p.tag]||'tag-none'}">${TAG_LABEL[p.tag]||'—'}</span></td>
+      <td><div class="action-btns"><button class="btn-edit" onclick="editProduct('${p.id}')">Edit</button><button class="btn-delete" onclick="deleteProduct('${p.id}')">Delete</button></div></td>
+    </tr>`;
+  }).join('');
+  });
+}
+
+var currentImgData=null;
+function previewImg(input){
+  const file=input.files[0];
+  if(!file) return;
+  if(file.size>2*1024*1024){showToast('Image too large. Max 2MB.');return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    currentImgData=e.target.result;
+    document.getElementById('img-preview').src=currentImgData;
+    document.getElementById('img-preview').style.display='block';
+    document.getElementById('img-placeholder').style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function openModal(id){
+  if(id===undefined) id=null;
+  editId=id;currentImgData=null;
+  document.getElementById('img-preview').style.display='none';
+  document.getElementById('img-placeholder').style.display='flex';
+  document.getElementById('f-img').value='';
+  if(id){
+    getProducts().then(function(prods){
+    var p=prods.find(function(x){return x.id===id;});
+    if(!p){document.getElementById('modal-overlay').classList.add('open');return;}
+    document.getElementById('modal-title').textContent='Edit Product';
+    document.getElementById('f-name').value=p.name;
+    document.getElementById('f-cat').value=p.category;
+    document.getElementById('f-tag').value=p.tag||'none';
+    document.getElementById('f-price').value=p.price;
+    document.getElementById('f-orig').value=p.origPrice||'';
+    document.getElementById('f-desc').value=p.description||'';
+    if(p.img){currentImgData=p.img;document.getElementById('img-preview').src=p.img;document.getElementById('img-preview').style.display='block';document.getElementById('img-placeholder').style.display='none';}
+    document.getElementById('modal-overlay').classList.add('open');
+    });
+    return;
+  }
+  {
+    document.getElementById('modal-title').textContent='Add Product';
+    document.getElementById('f-name').value='';document.getElementById('f-cat').value='Guitar';
+    document.getElementById('f-tag').value='none';document.getElementById('f-price').value='';
+    document.getElementById('f-orig').value='';document.getElementById('f-desc').value='';
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function editProduct(id){openModal(id);}
+
+function saveProduct(){
+  var name = document.getElementById('f-name').value.trim();
+  var price = document.getElementById('f-price').value.trim();
+  if(!name){ showToast('Please fill in the product name.'); return; }
+  var btn = document.querySelector('.btn-save');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+
+  function finish(isEdit){
+    renderTable();
+    renderSummary();
+    renderProducts();
+    showToast(isEdit ? 'Product updated!' : 'Product added!');
+    editId = null;
+    btn.textContent = 'Save Product';
+    btn.disabled = false;
+    closeModal();
+  }
+
+  function onError(e){
+    showToast('Error saving. Check your connection.');
+    console.error(e);
+    btn.textContent = 'Save Product';
+    btn.disabled = false;
+  }
+
+  var productData = {
+    name: name,
+    category: document.getElementById('f-cat').value,
+    tag: document.getElementById('f-tag').value,
+    price: Number(price) || null,
+    origPrice: document.getElementById('f-orig').value || null,
+    description: document.getElementById('f-desc').value,
+    img: currentImgData || null
+  };
+
+  if(editId){
+    var currentEditId = editId;
+    getProducts().then(function(prods){
+      var existing = prods.find(function(p){ return p.id === currentEditId; });
+      productData.id = currentEditId;
+      productData.img = currentImgData || (existing ? existing.img : null);
+      return saveProductToDB(productData, true);
+    }).then(function(){ finish(true); }).catch(onError);
+  } else {
+    saveProductToDB(productData, false)
+      .then(function(){ finish(false); })
+      .catch(onError);
+  }
+}
+
+function deleteProduct(id){
+  if(!confirm('Delete this product?')) return;
+  deleteProductFromDB(id).then(function(){
+    renderTable(); renderSummary(); renderProducts();
+    showToast('Product deleted.');
+  }).catch(function(e){
+    showToast('Error deleting. Check your connection.');
+    console.error(e);
+  });
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+
+function openInquiry(id){
+  getProducts().then(function(prods){
+  var p = prods.find(function(x){return x.id===id;});
+  if(!p) return;
+  const wrap = document.getElementById('inq-img-wrap');
+  if(p.img){
+    wrap.innerHTML = `<img class="inq-img" src="${p.img}" alt="${p.name}">`;
+  } else {
+    wrap.innerHTML = `<div class="inq-img-placeholder">${EMOJI[p.category]||'🎵'}</div>`;
+  }
+  document.getElementById('inq-name').textContent = p.name;
+  document.getElementById('inq-cat').textContent = p.category;
+  document.getElementById('inq-price').textContent = p.price ? '₱' + Number(p.price).toLocaleString() : '';
+  const msg = encodeURIComponent('Hi! I would like to inquire about: ' + p.name + (p.price ? ' (₱' + Number(p.price).toLocaleString() + ')' : ''));
+  document.getElementById('inq-btn').href = 'https://m.me/orlangemusicshoppe?text=' + msg;
+  document.getElementById('inq-overlay').classList.add('open');
+  });
+}
+function closeInquiry(){
+  document.getElementById('inq-overlay').classList.remove('open');
+}
+
+// Expose functions to global scope for onclick handlers
+window.showAdmin = showAdmin;
+window.backToSite = backToSite;
+window.doLogin = doLogin;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
+window.saveProduct = saveProduct;
+window.filterProducts = filterProducts;
+window.filterByCategory = filterByCategory;
+window.changeSlide = changeSlide;
+window.previewImg = previewImg;
+window.openInquiry = openInquiry;
+window.closeInquiry = closeInquiry;
+
+</script>
+
+<!-- INQUIRY MODAL -->
+<div class="inq-overlay" id="inq-overlay" onclick="if(event.target===this)closeInquiry()">
+  <div class="inq-card">
+    <button class="inq-close" onclick="closeInquiry()">×</button>
+    <div id="inq-img-wrap"></div>
+    <div class="inq-cat" id="inq-cat"></div>
+    <div class="inq-name" id="inq-name"></div>
+    <div class="inq-price" id="inq-price"></div>
+    <a class="inq-btn" id="inq-btn" href="https://m.me/orlangemusicshoppe" target="_blank">
+      <span class="inq-btn-icon">💬</span> Message Us to Inquire
+    </a>
+    <p class="inq-note">We'll get back to you right away on Messenger!</p>
+  </div>
+</div>
+
+</body>
+</html>
