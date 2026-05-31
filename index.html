@@ -307,14 +307,101 @@ tr:hover td{background:var(--orange-soft);}
 .inq-btn-icon{font-size:20px;line-height:1;}
 .inq-note{font-size:12px;color:var(--gray-600);margin-top:1rem;}
 
+/* ── TABLET (max 900px) ── */
+@media(max-width:900px){
+  .inst-grid{grid-template-columns:repeat(3,1fr);}
+  .lessons-inner{flex-direction:column;gap:1.5rem;}
+  .lessons-partner-card{max-width:100%;}
+  .reviews-grid{grid-template-columns:repeat(2,1fr);}
+  .stats-inner{gap:2rem;}
+}
+
+/* ── MOBILE (max 720px) ── */
 @media(max-width:720px){
-  .about-inner,.contact-grid{grid-template-columns:1fr;}
-  .inst-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
-  nav{padding:0 1.5rem;}
+  /* Nav */
+  nav{padding:0 1rem;height:64px;}
+  nav img[alt="Orlange Music Shoppe"]{height:52px !important;}
   .nav-links{display:none;}
-  .slide-content{padding:0 1.5rem 3rem;}
+  .nav-cta{font-size:11px;padding:7px 12px;}
+
+  /* Hero */
+  .hero{height:70vh;min-height:400px;border-radius:20% 12px 0 0 / 14% 12px 0 0;}
+  .slide-content{padding:0 1.2rem 2.5rem;}
+  .slide-title{font-size:1.8rem !important;}
+  .slide-sub{font-size:0.85rem;}
+  .slide-btns{flex-direction:column;gap:8px;}
+  .slide-btns a{text-align:center;padding:10px 20px;}
   .carousel-arrows{display:none;}
+  .carousel-dots{bottom:1rem;right:1rem;}
+
+  /* Sections padding */
+  .section{padding:3rem 1.2rem;}
+  .about-inner,.contact-grid{grid-template-columns:1fr;}
+  .about-visual{min-height:220px;}
+
+  /* Categories */
+  .inst-grid{grid-template-columns:repeat(2,1fr);gap:.7rem;}
+  .inst-card{padding:1rem;}
+  .inst-icon-wrap{width:36px;height:36px;}
+
+  /* Shop filter bar */
+  .filter-bar{gap:.4rem;}
+  .filter-btn{font-size:11px;padding:5px 10px;}
+
+  /* Products grid */
+  .products-grid{grid-template-columns:repeat(2,1fr);gap:1rem;}
+  .product-img-wrap{height:150px;}
+
+  /* Stats */
+  .stats-inner{gap:1.2rem;}
+  .stat-num{font-size:1.5rem;}
+  .stat-label{font-size:0.65rem;}
+
+  /* Lessons */
+  .lessons-banner{padding:3rem 1.2rem;}
+  .lessons-inner{flex-direction:column;gap:1.5rem;text-align:center;}
+  .lessons-partner-card{max-width:100%;}
+  .lessons-partner-actions{align-items:center;}
+
+  /* Reviews */
+  .reviews-grid{grid-template-columns:1fr;}
+
+  /* Contact */
+  .contact-grid{grid-template-columns:1fr;}
+
+  /* Footer - fix admin button overlap */
+  footer{padding:2rem 1.2rem 3.5rem;}
+  .footer-links{gap:1rem;font-size:12px;}
+  .footer-admin-btn{
+    position:static;
+    display:block;
+    text-align:center;
+    margin:1rem auto 0;
+    width:fit-content;
+  }
+  .footer-top{gap:.4rem;}
+
+  /* Modal */
   .modal-row{grid-template-columns:1fr;}
+  .modal{padding:1.5rem;margin:1rem;}
+  .inq-card{padding:1.5rem;}
+
+  /* Admin panel */
+  .admin-body{padding:1.5rem 1rem;}
+  .summary-cards{grid-template-columns:repeat(2,1fr);}
+  table{font-size:12px;}
+  th,td{padding:8px 10px;}
+}
+
+/* ── SMALL MOBILE (max 400px) ── */
+@media(max-width:400px){
+  .products-grid{grid-template-columns:1fr;}
+  .inst-grid{grid-template-columns:repeat(2,1fr);}
+  .slide-title{font-size:1.5rem !important;}
+  nav img[alt="Orlange Music Shoppe"]{height:44px !important;}
+  .nav-cta{display:none;}
+  .filter-bar{gap:.3rem;}
+  .filter-btn{font-size:10px;padding:4px 8px;}
 }
 </style>
 </head>
