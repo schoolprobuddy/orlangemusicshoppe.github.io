@@ -480,10 +480,14 @@ tr:hover td{background:var(--orange-soft);}
     </div>
     <div class="form-wrap">
       <h3>Send a message</h3>
-      <div class="field"><label>Your name</label><input type="text" placeholder="e.g. Juan dela Cruz"></div>
-      <div class="field"><label>Email or phone</label><input type="text" placeholder="So we can reach you"></div>
-      <div class="field"><label>Message</label><textarea placeholder="Ask about instruments, lessons, stock..."></textarea></div>
-      <button class="btn-submit">Send message</button>
+      <form id="contact-form">
+        <div class="field"><label>Your name</label><input type="text" name="name" placeholder="e.g. Juan dela Cruz" required></div>
+        <div class="field"><label>Email or phone</label><input type="text" name="email" placeholder="So we can reach you" required></div>
+        <div class="field"><label>Message</label><textarea name="message" placeholder="Ask about instruments, lessons, stock..." required></textarea></div>
+        <button type="submit" class="btn-submit" id="contact-submit">Send message</button>
+        <p id="form-success" style="display:none;color:#16a34a;font-size:14px;margin-top:1rem;text-align:center;">✅ Message sent! We'll get back to you soon.</p>
+        <p id="form-error" style="display:none;color:#dc2626;font-size:14px;margin-top:1rem;text-align:center;">❌ Something went wrong. Please try again.</p>
+      </form>
     </div>
   </div>
 </section>
