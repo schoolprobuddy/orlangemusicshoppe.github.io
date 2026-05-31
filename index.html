@@ -1031,6 +1031,38 @@ window.previewImg = previewImg;
 window.openInquiry = openInquiry;
 window.closeInquiry = closeInquiry;
 
+// Contact form submission
+var contactForm = document.getElementById('contact-form');
+if(contactForm){
+  contactForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn = document.getElementById('contact-submit');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+    var data = new FormData(contactForm);
+    fetch('https://formspree.io/f/mgoqbyvk', {
+      method: 'POST',
+      body: data,
+      headers: { 'Accept': 'application/json' }
+    }).then(function(response){
+      if(response.ok){
+        document.getElementById('form-success').style.display = 'block';
+        document.getElementById('form-error').style.display = 'none';
+        contactForm.reset();
+        btn.textContent = 'Send message';
+        btn.disabled = false;
+      } else {
+        throw new Error('Form error');
+      }
+    }).catch(function(){
+      document.getElementById('form-error').style.display = 'block';
+      btn.textContent = 'Send message';
+      btn.disabled = false;
+    });
+  });
+}
+
+
 </script>
 
 <!-- INQUIRY MODAL -->
