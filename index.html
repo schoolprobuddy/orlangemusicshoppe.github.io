@@ -1031,36 +1031,42 @@ window.previewImg = previewImg;
 window.openInquiry = openInquiry;
 window.closeInquiry = closeInquiry;
 
-// Contact form submission
-var contactForm = document.getElementById('contact-form');
-if(contactForm){
-  contactForm.addEventListener('submit', function(e){
-    e.preventDefault();
-    var btn = document.getElementById('contact-submit');
-    btn.textContent = 'Sending...';
-    btn.disabled = true;
-    var data = new FormData(contactForm);
-    fetch('https://formspree.io/f/mgoqbyvk', {
-      method: 'POST',
-      body: data,
-      headers: { 'Accept': 'application/json' }
-    }).then(function(response){
-      if(response.ok){
-        document.getElementById('form-success').style.display = 'block';
-        document.getElementById('form-error').style.display = 'none';
-        contactForm.reset();
+// Contact form submission - runs after DOM ready
+document.addEventListener('DOMContentLoaded', function(){
+  var contactForm = document.getElementById('contact-form');
+  console.log('Contact form found:', contactForm);
+  if(contactForm){
+    contactForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      console.log('Form submitted!');
+      var btn = document.getElementById('contact-submit');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+      var data = new FormData(contactForm);
+      fetch('https://formspree.io/f/mgoqbyvk', {
+        method: 'POST',
+        body: data,
+        headers: { 'Accept': 'application/json' }
+      }).then(function(response){
+        console.log('Response status:', response.status);
+        if(response.ok){
+          document.getElementById('form-success').style.display = 'block';
+          document.getElementById('form-error').style.display = 'none';
+          contactForm.reset();
+          btn.textContent = 'Send message';
+          btn.disabled = false;
+        } else {
+          throw new Error('Form error: ' + response.status);
+        }
+      }).catch(function(err){
+        console.error('Form error:', err);
+        document.getElementById('form-error').style.display = 'block';
         btn.textContent = 'Send message';
         btn.disabled = false;
-      } else {
-        throw new Error('Form error');
-      }
-    }).catch(function(){
-      document.getElementById('form-error').style.display = 'block';
-      btn.textContent = 'Send message';
-      btn.disabled = false;
+      });
     });
-  });
-}
+  }
+});
 
 
 </script>
