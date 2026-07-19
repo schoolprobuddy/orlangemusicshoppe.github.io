@@ -940,6 +940,17 @@ function filterByCategory(cat){
 
 /* ── ADMIN ── */
 var editId=null;
+
+// Security: sanitize user input to prevent XSS
+function sanitize(str){
+  if(!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#x27;');
+}
 var loggedIn=false;
 
 function showAdmin(e){
@@ -1248,16 +1259,4 @@ document.addEventListener('DOMContentLoaded', function(){
 </div>
 
 </body>
-</html
-// Security: sanitize user input to prevent XSS
-function sanitize(str){
-  if(!str) return '';
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#x27;');
-}
-
->
+</html>
