@@ -2,6 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self' https:;
+  script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://www.google-analytics.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src https://fonts.gstatic.com;
+  img-src 'self' data: https:;
+  connect-src 'self' https://*.supabase.co https://formspree.io https://www.google-analytics.com https://region1.google-analytics.com;
+  frame-ancestors 'none';
+">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-VWPGSLNXRY"></script>
 <script>
@@ -578,9 +589,9 @@ tr:hover td{background:var(--orange-soft);}
     <div class="form-wrap">
       <h3>Send a message</h3>
       <form id="contact-form">
-        <div class="field"><label>Your name</label><input type="text" name="name" placeholder="e.g. Juan dela Cruz" required></div>
-        <div class="field"><label>Email or phone</label><input type="text" name="email" placeholder="So we can reach you" required></div>
-        <div class="field"><label>Message</label><textarea name="message" placeholder="Ask about instruments, lessons, stock..." required></textarea></div>
+        <div class="field"><label>Your name</label><input type="text" name="name" placeholder="e.g. Juan dela Cruz" required maxlength="100"></div>
+        <div class="field"><label>Email or phone</label><input type="text" name="email" placeholder="So we can reach you" required maxlength="100"></div>
+        <div class="field"><label>Message</label><textarea name="message" placeholder="Ask about instruments, lessons, stock..." required maxlength="1000"></textarea></div>
         <button type="submit" class="btn-submit" id="contact-submit">Send message</button>
         <p id="form-success" style="display:none;color:#16a34a;font-size:14px;margin-top:1rem;text-align:center;">✅ Message sent! We'll get back to you soon.</p>
         <p id="form-error" style="display:none;color:#dc2626;font-size:14px;margin-top:1rem;text-align:center;">❌ Something went wrong. Please try again.</p>
@@ -612,6 +623,7 @@ tr:hover td{background:var(--orange-soft);}
       <span class="admin-nav-sub" style="margin-left:10px;">Product Manager</span>
     </div>
     <div class="admin-nav-right">
+      <button class="btn-back" id="logout-btn" style="display:none;" onclick="doLogout()">Log out</button>
       <button class="btn-back" onclick="backToSite()">← Back to website</button>
     </div>
   </div>
@@ -622,10 +634,11 @@ tr:hover td{background:var(--orange-soft);}
       <div class="login-card">
         <div class="login-icon">🔐</div>
         <div class="login-title">Admin Login</div>
-        <div class="login-sub">Enter your password to manage products</div>
-        <div class="login-field"><label>Password</label><input type="password" id="pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"></div>
-        <button class="login-btn" onclick="doLogin()">Log in</button>
-        <div class="login-error" id="login-error">Incorrect password. Try again.</div>
+        <div class="login-sub">Sign in with your admin account to manage products</div>
+        <div class="login-field"><label>Email</label><input type="email" id="email-input" placeholder="Enter email" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <div class="login-field"><label>Password</label><input type="password" id="pw-input" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="login-btn" id="login-btn" onclick="doLogin()">Log in</button>
+        <div class="login-error" id="login-error">Incorrect email or password. Try again.</div>
         
       </div>
     </div>
@@ -671,7 +684,7 @@ tr:hover td{background:var(--orange-soft);}
     </div>
     <div class="modal-field">
       <label>Product Name</label>
-      <input type="text" id="f-name" placeholder="e.g. Davis Acoustic Guitar">
+      <input type="text" id="f-name" placeholder="e.g. Davis Acoustic Guitar" maxlength="200">
     </div>
     <div class="modal-row">
       <div class="modal-field">
@@ -743,7 +756,7 @@ var sb = null;
   function tryInit() {
     if (typeof supabase !== 'undefined' && supabase.createClient) {
       sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      console.log('Supabase initialized!');
+      
     } else if (attempts < 20) {
       attempts++;
       setTimeout(tryInit, 100);
@@ -876,8 +889,8 @@ function renderProducts(filter){
     return `<div class="product-card" onclick="openInquiry('${p.id}')" style="cursor:pointer">
       <div class="product-img-wrap">${imgHtml}${badgeHtml}</div>
       <div class="product-info">
-        <div class="product-category">${p.category}</div>
-        <div class="product-name">${p.name}</div>
+        <div class="product-category">${sanitize(p.category)}</div>
+        <div class="product-name">${sanitize(p.name)}</div>
         <div class="product-price">${p.price?`₱${Number(p.price).toLocaleString()}${origHtml}`:''}</div>
       </div>
     </div>`;
@@ -916,8 +929,8 @@ function filterByCategory(cat){
     return `<div class="product-card" onclick="openInquiry('${p.id}')" style="cursor:pointer">
       <div class="product-img-wrap">${imgHtml}${badgeHtml}</div>
       <div class="product-info">
-        <div class="product-category">${p.category}</div>
-        <div class="product-name">${p.name}</div>
+        <div class="product-category">${sanitize(p.category)}</div>
+        <div class="product-name">${sanitize(p.name)}</div>
         <div class="product-price">${p.price?`₱${Number(p.price).toLocaleString()}${origHtml}`:''}</div>
       </div>
     </div>`;
@@ -927,21 +940,59 @@ function filterByCategory(cat){
 
 /* ── ADMIN ── */
 var editId=null;
-var ADMIN_PW='ajhaeY*2oi2';
 var loggedIn=false;
 
-function showAdmin(e){e.preventDefault();document.getElementById('website').style.display='none';document.getElementById('admin-panel').style.display='block';}
-function backToSite(){document.getElementById('admin-panel').style.display='none';document.getElementById('website').style.display='block';}
-function doLogin(){
-  var pw=document.getElementById('pw-input').value.trim();
-  if(pw==='ajhaeY*2oi2'){
-    loggedIn=true;
-    document.getElementById('login-section').style.display='none';
-    document.getElementById('admin-dashboard').style.display='block';
-    renderSummary();renderTable();
-  } else {
-    document.getElementById('login-error').style.display='block';
+function showAdmin(e){
+  e.preventDefault();
+  document.getElementById('website').style.display='none';
+  document.getElementById('admin-panel').style.display='block';
+  // Restore existing session if still valid
+  if(sb){
+    sb.auth.getSession().then(function(res){
+      if(res.data && res.data.session){ enterDashboard(); }
+    });
   }
+}
+function backToSite(){document.getElementById('admin-panel').style.display='none';document.getElementById('website').style.display='block';}
+
+function enterDashboard(){
+  loggedIn=true;
+  document.getElementById('login-section').style.display='none';
+  document.getElementById('admin-dashboard').style.display='block';
+  document.getElementById('logout-btn').style.display='inline-block';
+  renderSummary();renderTable();
+}
+function doLogin(){
+  var email=document.getElementById('email-input').value.trim();
+  var pw=document.getElementById('pw-input').value;
+  var btn=document.getElementById('login-btn');
+  var err=document.getElementById('login-error');
+  err.style.display='none';
+  if(!email||!pw){err.textContent='Please enter email and password.';err.style.display='block';return;}
+  if(!sb){err.textContent='Connection error. Please refresh and try again.';err.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Logging in...';
+  sb.auth.signInWithPassword({email:email,password:pw}).then(function(res){
+    btn.disabled=false;btn.textContent='Log in';
+    if(res.error){
+      err.textContent='Incorrect email or password. Try again.';
+      err.style.display='block';
+    } else {
+      document.getElementById('pw-input').value='';
+      enterDashboard();
+    }
+  }).catch(function(){
+    btn.disabled=false;btn.textContent='Log in';
+    err.textContent='Network error. Please try again.';
+    err.style.display='block';
+  });
+}
+function doLogout(){
+  if(sb){sb.auth.signOut();}
+  loggedIn=false;
+  document.getElementById('logout-btn').style.display='none';
+  document.getElementById('admin-dashboard').style.display='none';
+  document.getElementById('login-section').style.display='';
+  backToSite();
 }
 
 function renderSummary(){
@@ -972,7 +1023,7 @@ function renderTable(){
       :`<div class="td-img-placeholder">${EMOJI[p.category]||'🎵'}</div>`;
     return `<tr>
       <td>${imgCell}</td>
-      <td><strong>${p.name}</strong>${p.description?`<br><span style="font-size:12px;color:var(--gray-600)">${p.description}</span>`:''}</td>
+      <td><strong>${sanitize(p.name)}</strong>${p.description?`<br><span style="font-size:12px;color:var(--gray-600)">${sanitize(p.description)}</span>`:''}</td>
       <td>${p.category}</td>
       <td style="font-weight:700;color:var(--orange)">${p.price?`₱${Number(p.price).toLocaleString()}${p.origPrice?`<br><span style='font-size:11px;color:var(--gray-600);text-decoration:line-through;font-weight:400'>₱${Number(p.origPrice).toLocaleString()}</span>`:''}`:'<span style="font-size:12px;color:var(--gray-600);font-weight:500">Ask for price</span>'}</td>
       <td><span class="tag ${TAG_CLASS[p.tag]||'tag-none'}">${TAG_LABEL[p.tag]||'—'}</span></td>
@@ -1104,7 +1155,7 @@ function openInquiry(id){
   } else {
     wrap.innerHTML = `<div class="inq-img-placeholder">${EMOJI[p.category]||'🎵'}</div>`;
   }
-  document.getElementById('inq-name').textContent = p.name;
+  document.getElementById('inq-name').textContent = sanitize(p.name);
   document.getElementById('inq-cat').textContent = p.category;
   document.getElementById('inq-price').textContent = p.price ? '₱' + Number(p.price).toLocaleString() : '';
   const msg = encodeURIComponent('Hi! I would like to inquire about: ' + p.name + (p.price ? ' (₱' + Number(p.price).toLocaleString() + ')' : ''));
@@ -1120,6 +1171,7 @@ function closeInquiry(){
 window.showAdmin = showAdmin;
 window.backToSite = backToSite;
 window.doLogin = doLogin;
+window.doLogout = doLogout;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.editProduct = editProduct;
@@ -1135,11 +1187,19 @@ window.closeInquiry = closeInquiry;
 // Contact form submission - runs after DOM ready
 document.addEventListener('DOMContentLoaded', function(){
   var contactForm = document.getElementById('contact-form');
-  console.log('Contact form found:', contactForm);
+  
+  var lastSubmit = 0;
   if(contactForm){
     contactForm.addEventListener('submit', function(e){
       e.preventDefault();
-      console.log('Form submitted!');
+      // Rate limit: 1 submission per 60 seconds
+      var now = Date.now();
+      if(now - lastSubmit < 60000){
+        alert('Please wait a moment before sending another message.');
+        return;
+      }
+      lastSubmit = now;
+      
       var btn = document.getElementById('contact-submit');
       btn.textContent = 'Sending...';
       btn.disabled = true;
@@ -1149,7 +1209,7 @@ document.addEventListener('DOMContentLoaded', function(){
         body: data,
         headers: { 'Accept': 'application/json' }
       }).then(function(response){
-        console.log('Response status:', response.status);
+        
         if(response.ok){
           document.getElementById('form-success').style.display = 'block';
           document.getElementById('form-error').style.display = 'none';
@@ -1188,4 +1248,16 @@ document.addEventListener('DOMContentLoaded', function(){
 </div>
 
 </body>
-</html>
+</html
+// Security: sanitize user input to prevent XSS
+function sanitize(str){
+  if(!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#x27;');
+}
+
+>
